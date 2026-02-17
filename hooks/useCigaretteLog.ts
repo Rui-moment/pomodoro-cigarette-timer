@@ -1,5 +1,5 @@
 "use client";
-import { useState, useMemo, useEffect } from "react";
+import { useState, useMemo, useEffect, useCallback } from "react";
 
 interface CigaretteLog {
     timestamp: Date;
@@ -13,11 +13,11 @@ export function useCigaretteLog() {
 
     const [now, setNow] = useState(new Date());
 
-    const addLog = () => {
+    const addLog = useCallback(() => {
         const currentCheck = new Date();
         setLogs([...logs, { timestamp: currentCheck }]);
         setNow(currentCheck);
-    }
+    }, [logs]);
 
     useEffect(() => {
         const timer = setInterval(() => {

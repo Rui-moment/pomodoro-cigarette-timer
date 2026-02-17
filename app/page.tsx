@@ -1,5 +1,6 @@
 "use client";
-import { useState, useEffect } from "react";
+import PomodoroTimer from "./components/PomodoroTimer";
+import CigaretteTracker from "./components/CigaretteTracker";
 import { usePomodoro } from "@/hooks/usePomodoro";
 import { useCigaretteLog } from "@/hooks/useCigaretteLog";
 
@@ -9,71 +10,25 @@ export default function Home() {
 
   return (
     <>
-    <div className="p-8">
-      <p className="text-4xl mb-4">
-        {phase === "work" ? "作業中🔥" : "休憩中☕️"}</p>
-      <p className="text-4xl mb-4">残り: {seconds}秒</p>
-
-      <div className="space-x-2 mt-4">
-        <button
-          onClick={() => {start()}}
-          className="bg-blue-500 text-white px-4 py-2 rounded"
-        >
-          開始
-        </button>
-        <button
-          onClick={() => {stop()}}
-          className="bg-red-500 text-white px-4 py-2 rounded"
-        >
-          停止
-        </button>
-        <button
-          onClick={() => {
-            reset();
-          }}
-          className="bg-gray-500 text-white px-4 py-2 rounded"
-        >
-          リセット
-        </button>
-      </div>
-    </div>
-    <div className="mt-8 border-t pt-8">
-      <h2 className="text-xl font-bold mb-4">タバコ記録🚬</h2>
-
-      <button
-        onClick={addLog}
-        className="bg-orange-500 text-white px-6 py-3 rounded text-lg"
-      >
-        吸った
-      </button>
-      
-      <p className="mt-4 text-lg">
-        今日の本数: {logs.length}本
-      </p>
-      <p className="mt-2 text-gray-600">
-        {timeSinceLastLog !== null
-        ? `前回から ${timeSinceLastLog} 分経過`
-        : "まだ吸っていません"}
-      </p>
-      <p className="mt-2 text-gray-600">
-        {averageInterval !== null
-        ? `平均間隔: ${averageInterval} 分`
-        : ""}
-      </p>
-      <p className="mt-2">
-        {savings >= 0
-        ? `✅ ${savings}円節約`
-        : `❌ ${Math.abs(savings)}円追加で使っちゃった`}
-      </p>
-
-      <div className="mt-4 space-y-2">
-        {logs.map((log, index) => (
-          <div key={index}>
-            {log.timestamp.toLocaleString()} に吸った
-          </div>
-        ))}
-    </div>
-    </div>
+    <main className="max-w-md mx-auto p-4">
+      <h1 className="text-2xl font-bold mb-8">🍅禁煙ポモドーロ🍅</h1>
+      <PomodoroTimer
+        seconds={seconds}
+        isRunning={isRunning}
+        phase={phase}
+        start={start}
+        stop={stop}
+        reset={reset}
+      />
+      <CigaretteTracker
+        logs={logs}
+        addLog={addLog}
+        timeSinceLastLog={timeSinceLastLog}
+        averageInterval={averageInterval}
+        savings={savings}
+      />
+    </main>
     </>
   );  
 } 
+ 
