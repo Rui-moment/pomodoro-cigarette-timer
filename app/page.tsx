@@ -5,7 +5,7 @@ import { useCigaretteLog } from "@/hooks/useCigaretteLog";
 
 export default function Home() {
   const { seconds, isRunning, phase, start, stop, reset } = usePomodoro();
-  const { logs, addLog } = useCigaretteLog();
+  const { logs, addLog, timeSinceLastLog, averageInterval, savings } = useCigaretteLog();
 
   return (
     <>
@@ -49,6 +49,21 @@ export default function Home() {
       
       <p className="mt-4 text-lg">
         今日の本数: {logs.length}本
+      </p>
+      <p className="mt-2 text-gray-600">
+        {timeSinceLastLog !== null
+        ? `前回から ${timeSinceLastLog} 分経過`
+        : "まだ吸っていません"}
+      </p>
+      <p className="mt-2 text-gray-600">
+        {averageInterval !== null
+        ? `平均間隔: ${averageInterval} 分`
+        : ""}
+      </p>
+      <p className="mt-2">
+        {savings >= 0
+        ? `✅ ${savings}円節約`
+        : `❌ ${Math.abs(savings)}円追加で使っちゃった`}
       </p>
 
       <div className="mt-4 space-y-2">

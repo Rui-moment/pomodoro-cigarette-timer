@@ -1,1 +1,1 @@
-- [ ] `app/page.tsx` の61行目の `</>` の前に `</div>` を追加して、40行目の `div` タグを閉じます。
+- [ ] `app/page.tsx` で `useCigaretteLog` フックから `getTimeSinceLastLog` を分割代入に追加する。
