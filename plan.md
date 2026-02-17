@@ -1,1 +1,5 @@
-- [ ] `app/page.tsx` で `useCigaretteLog` フックから `getTimeSinceLastLog` を分割代入に追加する。
+- [x] `app/page.tsx` の61行目の `</>` の前に `</div>` を追加して、40行目の `div` タグを閉じます。
+- [x] `app/page.tsx` で `useCigaretteLog` フックから `getTimeSinceLastLog` を分割代入に追加する。
+- [x] `hooks/useCigaretteLog.ts` にリアルタイム更新ロジック (`useEffect`, `setInterval`) を追加する。
+- [x] `hooks/useCigaretteLog.ts` で `addLog` 時に `now` ステートも更新して、直後の計算で `now` が `lastLog.timestamp` より遅れないようにする。
+- [x] `hooks/useCigaretteLog.ts` で経過時間の計算結果がマイナスにならないよう `Math.max(0, ...)` を入れる。

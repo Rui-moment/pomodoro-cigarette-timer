@@ -1,5 +1,5 @@
 "use client";
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 
 interface CigaretteLog {
     timestamp: Date;
@@ -11,21 +11,31 @@ const PRICE_PER_CIGARETTE = 30; //todo:ユーザー側で設定できるよう�
 export function useCigaretteLog() {
     const [logs, setLogs] = useState<CigaretteLog[]>([]);
 
+    const [now, setNow] = useState(new Date());
+
     const addLog = () => {
-        const now = new Date();
-        setLogs([...logs, { timestamp: now }]);
+        const currentCheck = new Date();
+        setLogs([...logs, { timestamp: currentCheck }]);
+        setNow(currentCheck);
     }
+
+    useEffect(() => {
+        const timer = setInterval(() => {
+            setNow(new Date());
+        }, 60000); // 1分ごとに更新
+
+        return () => clearInterval(timer);
+    }, []);
 
     const timeSinceLastLog = useMemo(() => {
         if (logs.length === 0) {
             return null;
         }
-        const now = new Date();
         const lastLog = logs[logs.length - 1];
         const diffMs = now.getTime() - lastLog.timestamp.getTime();
         const diffMins = Math.floor(diffMs / 60000);
-        return diffMins;
-    }, [logs]);
+        return Math.max(0, diffMins);
+    }, [logs, now]);
 
     const averageInterval = useMemo(() => {
         if (logs.length < 2) {
