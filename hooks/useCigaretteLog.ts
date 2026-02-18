@@ -5,29 +5,71 @@ import { useLocalStorage } from "./useLocalStorage";
 interface CigaretteLog {
     timestamp: Date;
 }
+interface DailyHistory {
+    currentDate: string; // "2026-02-18"
+    todayLogs: CigaretteLog[];
+    history: {
+        [date: string]: CigaretteLog[];
+    }
+}
 
 const TARGET_CIGARETTES = 20;
 const PRICE_PER_CIGARETTE = 30; //todo:ユーザー側で設定できるようにする
+const getTodayString = (): string => {
+    const today = new Date();
+    return today.toISOString().split('T')[0]; //"2026-02-18"
+}
 
 export function useCigaretteLog() {
-    const [logs, setLogs] = useLocalStorage<CigaretteLog[]>(
+    const [dailyHistory, setDailyHistory] = useLocalStorage<DailyHistory>(
         'cigaretteLogs',
-        [],
+        {
+            currentDate: getTodayString(),
+            todayLogs: [],
+            history: {}
+        },
         (savedValue) => {
-            const parse = JSON.parse(savedValue);
-            return parse.map((log: any) => ({
-                timestamp: new Date(log.timestamp),
-            }))
+            const parsed = JSON.parse(savedValue);
+            return {
+                currentDate: parsed.currentDate ?? getTodayString(),
+                todayLogs: (parsed.todayLogs ?? []).map((log: any) => ({
+                    timestamp: new Date(log.timestamp),
+                })),
+                history: Object.fromEntries(
+                    (Object.entries(parsed.history ?? {}) as [string, any[]][]).map(([date, logs]) => [
+                        date,
+                        logs.map((log: any) => ({
+                            timestamp: new Date(log.timestamp),
+                        })),
+                    ])
+                )
+            }
         }
     );
+    useEffect(() => {
+        const today = getTodayString();
+        if (dailyHistory.currentDate !== today) {
+            setDailyHistory({
+                currentDate: today,
+                todayLogs: [],
+                history: {
+                    ...dailyHistory.history,
+                    [dailyHistory.currentDate]: dailyHistory.todayLogs,
+                },
+            });
+        }
+    }, []);
 
     const [now, setNow] = useState(new Date());
 
     const addLog = useCallback(() => {
         const currentCheck = new Date();
-        setLogs([...logs, { timestamp: currentCheck }]);
+        setDailyHistory({
+            ...dailyHistory,
+            todayLogs: [...dailyHistory.todayLogs, { timestamp: currentCheck }],
+        });
         setNow(currentCheck);
-    }, [logs]);
+    }, [dailyHistory]);
 
     useEffect(() => {
         const timer = setInterval(() => {
@@ -38,37 +80,37 @@ export function useCigaretteLog() {
     }, []);
 
     const timeSinceLastLog = useMemo(() => {
-        if (logs.length === 0) {
+        if (dailyHistory.todayLogs.length === 0) {
             return null;
         }
-        const lastLog = logs[logs.length - 1];
+        const lastLog = dailyHistory.todayLogs[dailyHistory.todayLogs.length - 1];
         const diffMs = now.getTime() - lastLog.timestamp.getTime();
         const diffMins = Math.floor(diffMs / 60000);
         return Math.max(0, diffMins);
-    }, [logs, now]);
+    }, [dailyHistory.todayLogs, now]);
 
     const averageInterval = useMemo(() => {
-        if (logs.length < 2) {
+        if (dailyHistory.todayLogs.length < 2) {
             return null;  //2本未満なら計算できない
         }
 
-    
+
         let tatalMs = 0; //合計（ミリ秒）
-        for (let i = 1; i < logs.length; i++) {
-            const diff = logs[i].timestamp.getTime() - logs[i-1].timestamp.getTime();
+        for (let i = 1; i < dailyHistory.todayLogs.length; i++) {
+            const diff = dailyHistory.todayLogs[i].timestamp.getTime() - dailyHistory.todayLogs[i-1].timestamp.getTime();
             tatalMs += diff;
         }
-        const avgMs = tatalMs / (logs.length - 1);
+        const avgMs = tatalMs / (dailyHistory.todayLogs.length - 1);
         const avgMin = Math.floor(avgMs / 60000);
         return avgMin;
-    }, [logs]);
+    }, [dailyHistory.todayLogs]);
 
     const savings = useMemo(() => {
-        return (TARGET_CIGARETTES - logs.length) * PRICE_PER_CIGARETTE;
-    }, [logs]);
+        return (TARGET_CIGARETTES - dailyHistory.todayLogs.length) * PRICE_PER_CIGARETTE;
+    }, [dailyHistory.todayLogs]);
 
     return {
-        logs,
+        logs: dailyHistory.todayLogs,
         addLog,
         timeSinceLastLog,
         averageInterval,

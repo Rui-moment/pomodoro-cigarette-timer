@@ -7,6 +7,10 @@ export function useLocalStorage<T>(
     deserialize?: (value: string) => T
 ) {
     const  [value, setValue] = useState(() => {
+        //サーバーサイドチェック
+        if (typeof window === 'undefined') {
+            return initialValue;
+        }
         const savedValue = localStorage.getItem(key);
         if (savedValue !== null) {
             return deserialize 
