@@ -4,8 +4,8 @@ import { useLocalStorage } from "./useLocalStorage";
 
 type Phase = "work" | "rest";
 
-const WORK_TIME = 10;
-const REST_TIME = 5;
+const WORK_TIME = 3600; //60分
+const REST_TIME = 600; //10分
 
 export function usePomodoro() {
   const [seconds, setSeconds] = useState(WORK_TIME);
@@ -15,8 +15,25 @@ export function usePomodoro() {
     'pomodoroEndTime',
     null
   );
-
-  // タイマー: 残り時間の計算のみ
+  //通知の許可をリクエスト(初回のみ)
+  useEffect(() => {
+    if (typeof window !== 'undefined' && 'Notification' in window) {
+      if (Notification.permission === 'default') {
+        Notification.requestPermission();
+      }
+    }
+  }, []);
+  //通知
+  const sendNotification = (title: string, body: string) => {
+    if (typeof window !== 'undefined' && 'Notification' in window) {
+        if (Notification.permission === 'granted') {
+            new Notification(title, {
+                body,
+            });
+        }
+    }
+  }
+  //タイマー: 残り時間の計算のみ
   useEffect(() => {
     if (!isRunning || !endTime) {
       return;
@@ -40,12 +57,16 @@ export function usePomodoro() {
       setEndTime(null);
       
       if (phase === "work") {
+        //作業終了 => 休憩開始
+        sendNotification("作業終了！", "休憩しましょう");
         setPhase("rest");
         setSeconds(REST_TIME);
         const newEnd = Date.now() + (REST_TIME * 1000);
         setEndTime(newEnd);
         setIsRunning(true);
       } else {
+        //休憩終了 => 作業開始
+        sendNotification("休憩終了！", "作業を再開しましょう🔥");
         setPhase("work");
         setSeconds(WORK_TIME);
         const newEnd = Date.now() + (WORK_TIME * 1000);
