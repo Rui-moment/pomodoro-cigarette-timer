@@ -8,8 +8,8 @@ const REST_TIME = 5;
 
 export function usePomodoro() {
     const [seconds, setSeconds] = useState(WORK_TIME);
-const [isRunning, setIsRunning] = useState(false);
-const [phase, setPhase] = useState<phase>("work");
+    const [isRunning, setIsRunning] = useState(false);
+    const [phase, setPhase] = useState<phase>("work");
 
 useEffect(() => {
   if (!isRunning || seconds === 0) {
@@ -34,10 +34,10 @@ useEffect(() => {
     }
   }
 }, [seconds, isRunning, phase]);
- const start = () => {
+    const start = () => {
     setIsRunning(true);
  }
- const stop = () => {
+    const stop = () => {
     setIsRunning(false);
  }
  const reset = () => {

@@ -1,5 +1,6 @@
 "use client";
 import { useState, useMemo, useEffect, useCallback } from "react";
+import { useLocalStorage } from "./useLocalStorage";
 
 interface CigaretteLog {
     timestamp: Date;
@@ -9,7 +10,16 @@ const TARGET_CIGARETTES = 20;
 const PRICE_PER_CIGARETTE = 30; //todo:ユーザー側で設定できるようにする
 
 export function useCigaretteLog() {
-    const [logs, setLogs] = useState<CigaretteLog[]>([]);
+    const [logs, setLogs] = useLocalStorage<CigaretteLog[]>(
+        'cigaretteLogs',
+        [],
+        (savedValue) => {
+            const parse = JSON.parse(savedValue);
+            return parse.map((log: any) => ({
+                timestamp: new Date(log.timestamp),
+            }))
+        }
+    );
 
     const [now, setNow] = useState(new Date());
 
