@@ -1,8 +1,8 @@
 "use client";
-import { useCigaretteLog } from "@/hooks/useCigaretteLog";
+import { useTimer } from "../providers/TImerProvider ";
 
 export default function LogPage() {
-  const { logs, timeSinceLastLog, averageInterval, savings } = useCigaretteLog();
+  const { logs, timeSinceLastLog, averageInterval, savings } = useTimer();
 
   return (
     <main className="max-w-md mx-auto p-4">

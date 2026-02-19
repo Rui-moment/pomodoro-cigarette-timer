@@ -1,9 +1,9 @@
 "use client";
 import Link from "next/link";
-import { useCigaretteLog } from "@/hooks/useCigaretteLog";
+import { useTimer } from "./providers/TImerProvider ";
 
 export default function Home() {
-  const { logs, savings } = useCigaretteLog();
+  const { logs, savings } = useTimer();
   const TARGET = 20; // TODO: 後で設定から取得
 
   return (

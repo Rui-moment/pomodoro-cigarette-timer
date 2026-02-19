@@ -1,11 +1,10 @@
 "use client";
-import { usePomodoro } from "@/hooks/usePomodoro";
-import { useCigaretteLog } from "@/hooks/useCigaretteLog";
+import { useTimer } from "../providers/TImerProvider ";
 import PomodoroTimer from "@/app/components/PomodoroTimer";
 
 export default function TimerPage() {
-  const { seconds, isRunning, phase, start, stop, reset } = usePomodoro();
-  const { addLog, timeSinceLastLog } = useCigaretteLog();
+  const { seconds, isRunning, phase, start, stop, reset } = useTimer();
+  const { addLog, timeSinceLastLog } = useTimer();
 
   return (
     <main className="max-w-md mx-auto p-4">

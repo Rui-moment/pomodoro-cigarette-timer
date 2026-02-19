@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import Navbar from "./components/Navbar";
+import { TimerProvider } from "./providers/TImerProvider ";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -26,10 +27,11 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
-      >
-        <Navbar />
-        {children}
+        className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
+          <TimerProvider>
+            <Navbar />
+            {children}
+          </TimerProvider>
       </body>
     </html>
   );
