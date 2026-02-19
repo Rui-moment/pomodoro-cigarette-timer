@@ -9,6 +9,19 @@ interface PomodoroTimerProps {
     stop: () => void;
     reset: () => void;
 }
+const formatTime = (second: number): string => {
+    const hours = Math.floor(second / 3600);
+    const minutes = Math.floor((second % 3600) / 60);
+    const seconds = second % 60;
+
+    if (hours > 0) {
+        //1時間以上の場合
+        return `${hours}:${minutes.toString().padStart(2, "0")}:${seconds.toString().padStart(2, "0")}`;
+    } else {
+        //1時間未満の場合
+        return `${minutes}:${seconds.toString().padStart(2, "0")}`;
+    }
+}
 
 const PomodoroTimer = React.memo(function PomodoroTimer({
     seconds,
@@ -23,7 +36,7 @@ const PomodoroTimer = React.memo(function PomodoroTimer({
             <p className="text-4xl mb-4">
                 {phase === "work" ? "作業中🔥" : "休憩中☕️"}
             </p>
-            <p className="text-4xl mb-4">残り: {seconds}秒</p>
+            <p className="text-4xl mb-4">残り: {formatTime(seconds)}</p>
 
             <div className="space-x-2 mt-4">
                 <button
