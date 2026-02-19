@@ -27,12 +27,15 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
+    <html lang="ja">
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
+        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+        style={{ background: '#0d0d0f', color: '#f5f5f5', minHeight: '100dvh' }}>
           <TimerProvider>
+            <div className="pb-20">
+              {children}
+            </div>
             <Navbar />
-            {children}
           </TimerProvider>
 
            <script dangerouslySetInnerHTML={{

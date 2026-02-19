@@ -1,8 +1,16 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --background: #0d0d0f;
+  --foreground: #f5f5f5;
+  --card: #1a1a1f;
+  --card-elevated: #24242c;
+  --border: #2a2a35;
+  --primary: #e05c3a;
+  --secondary: #5ca8e0;
+  --accent: #c084fc;
+  --success: #22c55e;
+  --muted: #9ca3af;
 }
 
 @theme inline {
@@ -12,15 +20,61 @@
   --font-mono: var(--font-geist-mono);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
-}
-
 body {
   background: var(--background);
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
+}
+
+/* 🚬 吸ったボタン - 3層グロー */
+@keyframes glow-burst {
+  0%   { box-shadow: 0 0 24px rgba(224, 92, 58, 0.12); }
+  20%  { box-shadow: 0 0 55px rgba(224, 92, 58, 0.95), 0 0 100px rgba(224, 92, 58, 0.5), 0 0 180px rgba(224, 92, 58, 0.22); }
+  100% { box-shadow: 0 0 24px rgba(224, 92, 58, 0.12); }
+}
+.glow-burst {
+  animation: glow-burst 0.8s ease-out;
+}
+
+/* 吸ったボタン - リップルリング */
+@keyframes ripple-ring {
+  0%   { transform: scale(1);    opacity: 0.8; }
+  100% { transform: scale(1.28); opacity: 0;   }
+}
+.ripple-ring {
+  animation: ripple-ring 0.65s ease-out forwards;
+  pointer-events: none;
+}
+
+/* 吸ったボタン - +1 フロート */
+@keyframes float-up {
+  0%   { transform: translateY(0)    scale(1);   opacity: 1; }
+  20%  { transform: translateY(-6px) scale(1.25); opacity: 1; }
+  100% { transform: translateY(-52px) scale(0.8); opacity: 0; }
+}
+.float-up {
+  animation: float-up 0.9s ease-out forwards;
+  pointer-events: none;
+}
+
+/* タイマー制御ボタン - フラッシュ */
+@keyframes ctrl-glow {
+  0%   { filter: brightness(1);   box-shadow: none; }
+  30%  { filter: brightness(1.6); box-shadow: 0 0 20px rgba(255,255,255,0.25); }
+  100% { filter: brightness(1);   box-shadow: none; }
+}
+.ctrl-glow {
+  animation: ctrl-glow 0.35s ease-out;
+}
+
+/* ボトムナビ - バウンス */
+@keyframes nav-bounce {
+  0%   { transform: scale(1); }
+  30%  { transform: scale(0.75); }
+  60%  { transform: scale(1.2);  }
+  80%  { transform: scale(0.93); }
+  100% { transform: scale(1); }
+}
+.nav-bounce {
+  animation: nav-bounce 0.42s cubic-bezier(0.36, 0.07, 0.19, 0.97);
 }
