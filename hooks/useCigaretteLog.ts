@@ -13,12 +13,23 @@ interface DailyHistory {
     }
 }
 
+interface SerializedLog {
+    timestamp: string;
+}
+
+interface SerializedDailyHistory {
+    currentDate?: string;
+    todayLogs?: SerializedLog[];
+    history?: Record<string, SerializedLog[]>;
+}
+
 const TARGET_CIGARETTES = 20;
 const PRICE_PER_CIGARETTE = 30; //todo:ユーザー側で設定できるようにする
+
 const getTodayString = (): string => {
     const today = new Date();
     return today.toISOString().split('T')[0]; //"2026-02-18"
-}
+};
 
 export function useCigaretteLog() {
     const [dailyHistory, setDailyHistory] = useLocalStorage<DailyHistory>(
@@ -29,16 +40,16 @@ export function useCigaretteLog() {
             history: {}
         },
         (savedValue) => {
-            const parsed = JSON.parse(savedValue);
+            const parsed = JSON.parse(savedValue) as SerializedDailyHistory;
             return {
                 currentDate: parsed.currentDate ?? getTodayString(),
-                todayLogs: (parsed.todayLogs ?? []).map((log: any) => ({
+                todayLogs: (parsed.todayLogs ?? []).map((log) => ({
                     timestamp: new Date(log.timestamp),
                 })),
                 history: Object.fromEntries(
-                    (Object.entries(parsed.history ?? {}) as [string, any[]][]).map(([date, logs]) => [
+                    Object.entries(parsed.history ?? {}).map(([date, logs]) => [
                         date,
-                        logs.map((log: any) => ({
+                        logs.map((log) => ({
                             timestamp: new Date(log.timestamp),
                         })),
                     ])
@@ -46,6 +57,7 @@ export function useCigaretteLog() {
             }
         }
     );
+
     useEffect(() => {
         const today = getTodayString();
         if (dailyHistory.currentDate !== today) {
@@ -58,18 +70,18 @@ export function useCigaretteLog() {
                 },
             });
         }
-    }, []);
+    }, [dailyHistory.currentDate, dailyHistory.history, dailyHistory.todayLogs, setDailyHistory]);
 
     const [now, setNow] = useState(new Date());
 
     const addLog = useCallback(() => {
         const currentCheck = new Date();
-        setDailyHistory({
-            ...dailyHistory,
-            todayLogs: [...dailyHistory.todayLogs, { timestamp: currentCheck }],
-        });
+        setDailyHistory((previous: DailyHistory) => ({
+            ...previous,
+            todayLogs: [...previous.todayLogs, { timestamp: currentCheck }],
+        }));
         setNow(currentCheck);
-    }, [dailyHistory]);
+    }, [setDailyHistory]);
 
     useEffect(() => {
         const timer = setInterval(() => {
@@ -109,8 +121,17 @@ export function useCigaretteLog() {
         return (TARGET_CIGARETTES - dailyHistory.todayLogs.length) * PRICE_PER_CIGARETTE;
     }, [dailyHistory.todayLogs]);
 
+    const dailyLogMap = useMemo(() => {
+        return {
+            ...dailyHistory.history,
+            [dailyHistory.currentDate]: dailyHistory.todayLogs,
+        };
+    }, [dailyHistory.currentDate, dailyHistory.history, dailyHistory.todayLogs]);
+
     return {
         logs: dailyHistory.todayLogs,
+        todayKey: dailyHistory.currentDate,
+        dailyLogMap,
         addLog,
         timeSinceLastLog,
         averageInterval,

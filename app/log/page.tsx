@@ -1,110 +1,132 @@
 "use client";
+import { useMemo, useState } from "react";
+import PeriodTabs from "@/app/components/log/PeriodTabs";
+import { DAY_PARTS, DayPartId, isHourInRange } from "@/app/components/log/log-utils";
 import { useTimer } from "../providers/TImerProvider ";
 
 export default function LogPage() {
-  const { logs, timeSinceLastLog, averageInterval, savings } = useTimer();
+  const { logs } = useTimer();
+  const [activeDayPart, setActiveDayPart] = useState<DayPartId>("morning");
 
-  const cardStyle: React.CSSProperties = {
-    background: '#1a1a1f',
-    border: '1px solid #2a2a35',
-  };
+  const todayDayParts = useMemo(() => {
+    const points = DAY_PARTS.map((part) => ({
+      ...part,
+      count: logs.filter((log) =>
+        isHourInRange(log.timestamp.getHours(), part.startHour, part.endHour),
+      ).length,
+    }));
+    const maxCount = Math.max(1, ...points.map((point) => point.count));
+
+    return { points, maxCount };
+  }, [logs]);
+
+  const selectedSummary = useMemo(() => {
+    const target = todayDayParts.points.find((part) => part.id === activeDayPart);
+    return {
+      label: target?.label ?? "朝",
+      count: target?.count ?? 0,
+      color: target?.color ?? "#e05c3a",
+    };
+  }, [activeDayPart, todayDayParts.points]);
+
+  const selectedRatio = logs.length === 0
+    ? 0
+    : Math.round((selectedSummary.count / logs.length) * 100);
 
   return (
     <main className="max-w-md mx-auto p-4 pt-8">
-      <p className="text-xs uppercase tracking-widest mb-6" style={{ color: '#9ca3af' }}>記録</p>
+      <div className="mb-7">
+        <p className="text-xs uppercase tracking-widest mb-1" style={{ color: "#9ca3af" }}>
+          今日の記録
+        </p>
+        <p className="text-sm" style={{ color: "#6b7280" }}>
+          時間帯ごとの傾向を確認
+        </p>
+      </div>
 
-      {/* 2×2 Stats Grid */}
-      <div className="grid grid-cols-2 gap-3 mb-8">
-        <div className="p-4 rounded-2xl" style={cardStyle}>
-          <p className="text-xs mb-1" style={{ color: '#9ca3af' }}>今日</p>
-          <p className="text-2xl font-bold" style={{ color: '#e05c3a' }}>
-            {logs.length}
-            <span className="text-sm font-normal ml-0.5" style={{ color: '#9ca3af' }}>本</span>
-          </p>
-        </div>
+      <PeriodTabs active="today" />
 
-        <div className="p-4 rounded-2xl" style={cardStyle}>
-          <p className="text-xs mb-1" style={{ color: '#9ca3af' }}>前回から</p>
-          <p className="text-2xl font-bold" style={{ color: '#f5f5f5' }}>
-            {timeSinceLastLog !== null
-              ? <>{timeSinceLastLog}<span className="text-sm font-normal ml-0.5" style={{ color: '#9ca3af' }}>分</span></>
-              : <span style={{ color: '#6b7280' }}>—</span>
-            }
-          </p>
-        </div>
-
-        <div className="p-4 rounded-2xl" style={cardStyle}>
-          <p className="text-xs mb-1" style={{ color: '#9ca3af' }}>平均間隔</p>
-          <p className="text-2xl font-bold" style={{ color: '#f5f5f5' }}>
-            {averageInterval !== null
-              ? <>{averageInterval}<span className="text-sm font-normal ml-0.5" style={{ color: '#9ca3af' }}>分</span></>
-              : <span style={{ color: '#6b7280' }}>—</span>
-            }
-          </p>
-        </div>
-
-        <div className="p-4 rounded-2xl" style={cardStyle}>
-          <p className="text-xs mb-1" style={{ color: '#9ca3af' }}>節約額</p>
-          <p className="text-2xl font-bold" style={{ color: savings >= 0 ? '#22c55e' : '#e05c3a' }}>
-            {savings >= 0 ? '+' : '-'}¥{Math.abs(savings)}
-          </p>
+      <div className="mb-5 rounded-2xl p-5" style={{ background: "#1a1a1f", border: "1px solid #2a2a35" }}>
+        <div className="flex items-end justify-between">
+          <div>
+            <p className="text-xs" style={{ color: "#9ca3af" }}>
+              今日の本数
+            </p>
+            <p className="text-4xl font-bold" style={{ color: "#e05c3a" }}>
+              {logs.length}
+              <span className="text-base font-normal ml-1" style={{ color: "#9ca3af" }}>
+                本
+              </span>
+            </p>
+          </div>
         </div>
       </div>
 
-      {/* Timeline */}
-      <p className="text-xs uppercase tracking-widest mb-4" style={{ color: '#9ca3af' }}>今日の記録</p>
-
       {logs.length === 0 ? (
-        <p className="text-center py-10" style={{ color: '#6b7280' }}>まだ記録がありません</p>
+        <p className="text-center py-10" style={{ color: "#6b7280" }}>
+          まだ記録がありません
+        </p>
       ) : (
-        <div>
-          {logs.map((log: { timestamp: Date }, i: number) => {
-            const prevLog = logs[i - 1];
-            const diffMin = prevLog
-              ? Math.round((log.timestamp.getTime() - prevLog.timestamp.getTime()) / 60000)
-              : null;
-
-            return (
-              <div key={log.timestamp.getTime()} className="flex gap-4">
-                {/* Timeline column */}
-                <div className="flex flex-col items-center">
-                  <div
-                    className="w-2.5 h-2.5 rounded-full mt-1 flex-shrink-0"
-                    style={{ background: '#c084fc' }}
-                  />
-                  {i < logs.length - 1 && (
+        <div className="space-y-4">
+          <div className="rounded-2xl p-4" style={{ background: "#1a1a1f", border: "1px solid #2a2a35" }}>
+            <p className="text-xs mb-3" style={{ color: "#9ca3af" }}>
+              時間帯サマリー
+            </p>
+            <div className="grid grid-cols-2 gap-2">
+              {todayDayParts.points.map((part) => (
+                <button
+                  type="button"
+                  key={part.id}
+                  onClick={() => setActiveDayPart(part.id)}
+                  className="rounded-xl p-3 text-left transition-all duration-200"
+                  style={{
+                    background: activeDayPart === part.id ? `${part.color}22` : "rgba(255,255,255,0.03)",
+                    border: activeDayPart === part.id ? `1px solid ${part.color}` : `1px solid ${part.color}55`,
+                  }}
+                >
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="text-xs" style={{ color: "#9ca3af" }}>
+                      {part.label}
+                    </span>
+                    <span className="text-sm font-semibold" style={{ color: "#f5f5f5" }}>
+                      {part.count}本
+                    </span>
+                  </div>
+                  <div className="h-1.5 rounded-full" style={{ background: "#2a2a35" }}>
                     <div
-                      className="w-px flex-1 mt-1"
+                      className="h-1.5 rounded-full transition-all duration-300"
                       style={{
-                        background: 'repeating-linear-gradient(to bottom, #2a2a35 0, #2a2a35 4px, transparent 4px, transparent 8px)',
-                        minHeight: '36px',
+                        width: `${Math.round((part.count / todayDayParts.maxCount) * 100)}%`,
+                        background: part.color,
                       }}
                     />
-                  )}
-                </div>
+                  </div>
+                </button>
+              ))}
+            </div>
+          </div>
 
-                {/* Content */}
-                <div className="pb-6 flex items-start gap-3 flex-wrap">
-                  <span className="text-sm font-mono" style={{ color: '#f5f5f5' }}>
-                    {log.timestamp.toLocaleTimeString('ja-JP', { hour: '2-digit', minute: '2-digit' })}
+          <div className="rounded-2xl p-4" style={{ background: "#1a1a1f", border: "1px solid #2a2a35" }}>
+            <p className="text-xs mb-3" style={{ color: "#9ca3af" }}>
+              選択中の時間帯
+            </p>
+            <div className="rounded-xl p-4" style={{ background: "rgba(255,255,255,0.03)", border: `1px solid ${selectedSummary.color}66` }}>
+              <div className="flex items-end justify-between">
+                <p className="text-sm font-semibold" style={{ color: selectedSummary.color }}>
+                  {selectedSummary.label}
+                </p>
+                <p className="text-2xl font-bold" style={{ color: "#f5f5f5" }}>
+                  {selectedSummary.count}
+                  <span className="text-sm font-normal ml-1" style={{ color: "#9ca3af" }}>
+                    本
                   </span>
-                  <span className="text-xs" style={{ color: '#9ca3af' }}>{i + 1}本目</span>
-                  {diffMin !== null && (
-                    <span
-                      className="text-xs px-2 py-0.5 rounded-full"
-                      style={{
-                        background: 'rgba(192,132,252,0.1)',
-                        border: '1px solid rgba(192,132,252,0.2)',
-                        color: '#c084fc',
-                      }}
-                    >
-                      +{diffMin}分後
-                    </span>
-                  )}
-                </div>
+                </p>
               </div>
-            );
-          })}
+              <p className="text-xs mt-2" style={{ color: "#9ca3af" }}>
+                全体の {selectedRatio}% を占めています
+              </p>
+            </div>
+          </div>
         </div>
       )}
     </main>

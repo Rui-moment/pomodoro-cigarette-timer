@@ -12,6 +12,8 @@ interface TimerContextType {
     reset: () => void;
     //useCigaretteLog
     logs: Array<{ timestamp: Date; }>
+    todayKey: string;
+    dailyLogMap: Record<string, Array<{ timestamp: Date }>>;
     addLog: () => void;
     timeSinceLastLog: number | null;
     averageInterval: number | null;
