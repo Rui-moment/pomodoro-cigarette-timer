@@ -17,6 +17,8 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: "禁煙ポモドーロ",
   description: "ポモドーロテクニックを使って禁煙をサポートするアプリ",
+  manifest: "/manifest.json",
+  themeColor: "#f97316",
 };
 
 export default function RootLayout({
@@ -32,6 +34,18 @@ export default function RootLayout({
             <Navbar />
             {children}
           </TimerProvider>
+
+           <script dangerouslySetInnerHTML={{
+            __html: `
+            if ('serviceWorker' in navigator) {
+              window.addEventListener('load', () => {
+                navigator.serviceWorker.register('/sw.js')
+                .then(reg => console.log('Service Worker registered', reg))
+                .catch(err => console.log('Service Worker registration failed', err))
+              });
+            }
+            `
+           }} />
       </body>
     </html>
   );
