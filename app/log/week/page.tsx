@@ -85,7 +85,7 @@ export default function WeekLogPage() {
         </p>
       </div>
 
-      <PeriodTabs active="week" />
+      <PeriodTabs />
 
       <div className="grid grid-cols-2 gap-3 mb-6">
         <div className="p-4 rounded-2xl" style={{ background: "#1a1a1f", border: "1px solid #2a2a35" }}>

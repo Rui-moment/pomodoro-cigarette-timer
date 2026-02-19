@@ -44,7 +44,7 @@ export default function LogPage() {
         </p>
       </div>
 
-      <PeriodTabs active="today" />
+      <PeriodTabs />
 
       <div className="mb-5 rounded-2xl p-5" style={{ background: "#1a1a1f", border: "1px solid #2a2a35" }}>
         <div className="flex items-end justify-between">
